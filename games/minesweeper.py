@@ -19,6 +19,8 @@ FPS = 60
 ROWS = 9
 COLS = 9
 MINES = 10
+SAFE_CELL_POINTS = 10
+WIN_BONUS = 100
 
 BG = (24, 26, 35)
 PANEL = (40, 44, 60)
@@ -70,10 +72,14 @@ class Minesweeper:
         self.font_small = pygame.font.SysFont(FONT_NAMES, 17)
 
         self.wins = 0
+        self.session_best = 0
         self.reset()
 
     def reset(self):
         """Создать закрытое поле; мины появятся после первого хода."""
+        if hasattr(self, "score"):
+            self.session_best = max(self.session_best, self.score)
+        self.score = 0
         self.mines = set()
         self.revealed = set()
         self.flags = set()
@@ -130,8 +136,10 @@ class Minesweeper:
         if cell in self.mines:
             self.revealed.update(self.mines)
             self.state = "lost"
+            self.session_best = max(self.session_best, self.score)
             return
 
+        revealed_before = len(self.revealed)
         queue = deque([cell])
         while queue:
             current = queue.popleft()
@@ -144,10 +152,13 @@ class Minesweeper:
                     if neighbor not in self.mines and neighbor not in self.revealed:
                         queue.append(neighbor)
 
+        self.score += (len(self.revealed) - revealed_before) * SAFE_CELL_POINTS
         if len(self.revealed) == self.rows * self.cols - self.mine_count:
             self.state = "won"
             self.flags = set(self.mines)
             self.wins += 1
+            self.score += WIN_BONUS
+        self.session_best = max(self.session_best, self.score)
 
     def toggle_flag(self, row, col):
         """Поставить или снять флаг на закрытой клетке."""
@@ -240,7 +251,8 @@ class Minesweeper:
 
         remaining = self.mine_count - len(self.flags)
         info = self.font_text.render(
-            f"Мин: {remaining}    Побед: {self.wins}", True, MUTED
+            f"Мин: {remaining}    Очки: {self.score}    "
+            f"Рекорд: {self.session_best}", True, MUTED
         )
         self.screen.blit(info, info.get_rect(topright=(self.width - 30, 31)))
 
@@ -260,13 +272,14 @@ class Minesweeper:
         pygame.display.flip()
 
     def run(self):
-        """Игровой цикл; возвращает число побед за сессию."""
+        """Игровой цикл; возвращает лучший результат за сессию."""
         while True:
             if not self.handle_events():
                 break
             self.draw()
             self.clock.tick(FPS)
-        return self.wins or None
+        self.session_best = max(self.session_best, self.score)
+        return self.session_best or None
 
 
 def run(screen, clock):

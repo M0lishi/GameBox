@@ -30,6 +30,7 @@ GAMES = [
 UNITS = {
     "guess_number": "попыток",
     "reaction": "мс",
+    "minesweeper": "очков",
 }
 
 
