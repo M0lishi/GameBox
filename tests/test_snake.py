@@ -6,17 +6,15 @@ import sys
 import unittest
 from unittest import mock
 
-# Окно не нужно: pygame работает без экрана и звука (важно для CI и серверов)
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
-# Чтобы импортировать games.snake, как бы ни запускали тесты
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import pygame  # noqa: E402
+import pygame  
 
-from games import snake  # noqa: E402
-from games.snake import Direction, Food, Game, Position, Snake  # noqa: E402
+from games import snake  
+from games.snake import Direction, Food, Game, Position, Snake  
 
 
 def key_event(key, unicode=""):
