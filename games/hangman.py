@@ -117,7 +117,7 @@ class Hangman:
                     self.new_word()
                 else:
                     letter = event.unicode.upper().replace("Ё", "Е")
-                    if letter in ALPHABET:
+                    if len(letter) == 1 and letter in ALPHABET:
                         self.guess(letter)
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
